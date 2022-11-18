@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Kids Drawing App</string>
+    <string name="small_brush">small brush</string>
+    <string name="medium_brush">medium brush</string>
+    <string name="large_brush">large_brush</string>
+    <string name="brush_selector">Brush Selector</string>
+    <string name="yellow_button">Yellow Button</string>
+    <string name="skin_button">Skin Button</string>
+    <string name="black_button">black_button</string>
+    <string name="red_button">red_button</string>
+    <string name="green_button">green_button</string>
+    <string name="blue_button">blue_button</string>
+    <string name="lollipop_button">lollipop_button</string>
+    <string name="random_button">random_button</string>
+</resources>
