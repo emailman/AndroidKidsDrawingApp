@@ -3,6 +3,7 @@ package edu.mailman.kidsdrawingapp
 import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
@@ -57,5 +58,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         brushDialog.show()
+    }
+
+    fun paintClicked(view: View) {
+        if (view != imageButtonCurrentPaint) {
+            val imageButton = view as ImageButton
+            val colorTag = imageButton.tag.toString()
+            drawingView.setColor(colorTag)
+
+            // Show the selected button as pressed
+            imageButton.setImageDrawable(
+                ContextCompat.getDrawable(this, R.drawable.pallet_pressed))
+
+            // Show the prior button as normal
+            imageButtonCurrentPaint.setImageDrawable(
+                ContextCompat.getDrawable(this, R.drawable.pallet_normal))
+
+            // This is the new current button
+            imageButtonCurrentPaint = view
+        }
     }
 }

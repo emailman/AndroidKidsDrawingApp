@@ -26,8 +26,6 @@ class DrawingView (context: Context, attrs: AttributeSet) : View(context, attrs)
         setUpDrawing()
     }
 
-    internal inner class CustomPath(var color: Int, var brushThickness: Float): Path()
-
     private fun setUpDrawing() {
         drawPaint = Paint()
         drawPath = CustomPath(color, brushSize)
@@ -104,5 +102,13 @@ class DrawingView (context: Context, attrs: AttributeSet) : View(context, attrs)
             newSize, resources.displayMetrics)
         drawPaint.strokeWidth = brushSize
     }
+
+    fun setColor(newColor: String) {
+        color = Color.parseColor(newColor)
+        drawPaint.color = color
+    }
+
+    internal inner class CustomPath(var color: Int, var brushThickness: Float): Path()
+
 
 }
