@@ -24,7 +24,7 @@
             android:layout_height="match_parent"
             android:contentDescription="@string/image"
             android:scaleType="centerCrop"
-            android:src="@drawable/image">
+            tools:src="@drawable/image">
         </ImageView>
 
         <edu.mailman.kidsdrawingapp.DrawingView
