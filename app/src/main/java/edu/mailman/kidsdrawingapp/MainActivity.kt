@@ -2,6 +2,7 @@ package edu.mailman.kidsdrawingapp
 
 import android.app.Dialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -19,6 +21,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
     private lateinit var drawingView: DrawingView
@@ -91,6 +100,20 @@ class MainActivity : AppCompatActivity() {
         ibUndo.setOnClickListener {
             drawingView.onClickUndo()
         }
+
+        val ibSave: ImageButton = findViewById(R.id.ib_save)
+        ibSave.setOnClickListener {
+            // Note android grants write allowed permission automatically
+            // when granting read permission
+            if (isReadStorageAllowed()) {
+                lifecycleScope.launch {
+                    val flDrawingView: FrameLayout =
+                        findViewById(R.id.fl_drawing_view_container)
+                    val myBitmap = getBitmapFromView(flDrawingView)
+                    saveBitmapFile(myBitmap)
+                }
+            }
+        }
     }
 
     private fun showBrushSizeChooserDialog() {
@@ -119,23 +142,11 @@ class MainActivity : AppCompatActivity() {
         brushDialog.show()
     }
 
-    fun paintClicked(view: View) {
-        if (view != imageButtonCurrentPaint) {
-            val imageButton = view as ImageButton
-            val colorTag = imageButton.tag.toString()
-            drawingView.setColor(colorTag)
+    private fun isReadStorageAllowed(): Boolean {
+        val result = ContextCompat.checkSelfPermission(this,
+        android.Manifest.permission.READ_EXTERNAL_STORAGE)
 
-            // Show the selected button as pressed
-            imageButton.setImageDrawable(
-                ContextCompat.getDrawable(this, R.drawable.pallet_pressed))
-
-            // Show the prior button as normal
-            imageButtonCurrentPaint.setImageDrawable(
-                ContextCompat.getDrawable(this, R.drawable.pallet_normal))
-
-            // This is the new current button
-            imageButtonCurrentPaint = view
-        }
+        return result == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestStoragePermission() {
@@ -145,7 +156,8 @@ class MainActivity : AppCompatActivity() {
                 "App needs access to external storage for background images")
         } else {
             requestPermission.launch(arrayOf(
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
             ))
         }
     }
@@ -177,5 +189,69 @@ class MainActivity : AppCompatActivity() {
         view.draw(canvas)
 
         return returnedBitmap
+    }
+
+    // Create a coroutine to save the bitmap to a file
+    // Note a dependency must added to be build.gradle file
+    private suspend fun saveBitmapFile(bitmap: Bitmap?): String {
+        var result = ""
+        withContext(Dispatchers.IO) {
+            if (bitmap != null) {
+                try {
+                    val bytes = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 90, bytes)
+
+                    // Save the file
+                    val f = File(externalCacheDir?.absoluteFile.toString() +
+                            File.separator + "KidsDrawingApp_" +
+                            System.currentTimeMillis() / 1000 + ".png")
+                    val fo = FileOutputStream(f)
+                    fo.write(bytes.toByteArray())
+                    fo.close()
+
+                    result = f.absolutePath
+
+                    runOnUiThread {
+                        if (result.isNotEmpty()) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "File saved successfully :$result",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "File not saved",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                        }
+                    }
+                } catch (e: Exception){
+                    result = ""
+                    e.printStackTrace()
+                }
+            }
+        }
+        return result
+    }
+
+    fun paintClicked(view: View) {
+        if (view != imageButtonCurrentPaint) {
+            val imageButton = view as ImageButton
+            val colorTag = imageButton.tag.toString()
+            drawingView.setColor(colorTag)
+
+            // Show the selected button as pressed
+            imageButton.setImageDrawable(
+                ContextCompat.getDrawable(this, R.drawable.pallet_pressed))
+
+            // Show the prior button as normal
+            imageButtonCurrentPaint.setImageDrawable(
+                ContextCompat.getDrawable(this, R.drawable.pallet_normal))
+
+            // This is the new current button
+            imageButtonCurrentPaint = view
+        }
     }
 }
