@@ -13,4 +13,5 @@
     <string name="lollipop_button">lollipop_button</string>
     <string name="random_button">random_button</string>
     <string name="image">Image</string>
+    <string name="save_selector">Save Selector</string>
 </resources>
