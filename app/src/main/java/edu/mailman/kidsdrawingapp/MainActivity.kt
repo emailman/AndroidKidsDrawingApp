@@ -33,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var drawingView: DrawingView
     private lateinit var imageButtonCurrentPaint: ImageButton
 
+    private var customProgressDialog: Dialog? = null
+
     private val openGalleryLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result ->
@@ -106,6 +108,7 @@ class MainActivity : AppCompatActivity() {
             // Note android grants write allowed permission automatically
             // when granting read permission
             if (isReadStorageAllowed()) {
+                showProgressDialog()
                 lifecycleScope.launch {
                     val flDrawingView: FrameLayout =
                         findViewById(R.id.fl_drawing_view_container)
@@ -212,6 +215,7 @@ class MainActivity : AppCompatActivity() {
                     result = f.absolutePath
 
                     runOnUiThread {
+                        cancelProgressDialog()
                         if (result.isNotEmpty()) {
                             Toast.makeText(
                                 this@MainActivity,
@@ -252,6 +256,19 @@ class MainActivity : AppCompatActivity() {
 
             // This is the new current button
             imageButtonCurrentPaint = view
+        }
+    }
+
+    private fun showProgressDialog() {
+        customProgressDialog = Dialog(this@MainActivity)
+        customProgressDialog?.setContentView(R.layout.dialog_custom_progress)
+        customProgressDialog?.show()
+    }
+
+    private fun cancelProgressDialog() {
+        if (customProgressDialog != null) {
+            customProgressDialog?.dismiss()
+            customProgressDialog = null
         }
     }
 }
