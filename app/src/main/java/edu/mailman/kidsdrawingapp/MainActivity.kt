@@ -78,13 +78,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        Toast.makeText(
+            this@MainActivity,
+            "Welcome",
+            Toast.LENGTH_LONG
+        ).show()
+
+
         drawingView = findViewById(R.id.drawing_view)
         // Set brush size based on screen metrics
         drawingView.setSizeForBrush(20F)
 
         val linearLayoutPaintColors = findViewById<LinearLayout>(R.id.ll_paint_colors)
-        // Set current paint color to index 2 in the linear layout
-        imageButtonCurrentPaint = linearLayoutPaintColors[2] as ImageButton
+        // Set current paint color to index 1 in the linear layout (black)
+        imageButtonCurrentPaint = linearLayoutPaintColors[1] as ImageButton
         imageButtonCurrentPaint.setImageDrawable(
             ContextCompat.getDrawable(this, R.drawable.pallet_pressed)
         )
@@ -235,6 +242,7 @@ class MainActivity : AppCompatActivity() {
                 } catch (e: Exception){
                     result = ""
                     e.printStackTrace()
+
                 }
             }
         }
@@ -275,13 +283,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun shareImage(result: String) {
         MediaScannerConnection.scanFile(this, arrayOf(result), null) {
-            path, uri ->
+                _, uri ->
             val shareIntent = Intent()
             shareIntent.action = Intent.ACTION_SEND
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
             shareIntent.type = "image/png"  // mime type
             startActivity(Intent.createChooser(shareIntent, "Share"))
-
         }
     }
 }
